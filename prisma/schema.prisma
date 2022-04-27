@@ -21,8 +21,6 @@ model User {
     lastname    String?
     posts       Post[]
     role        Role     @default(USER)
-    validEmail  Boolean  @default(false)
-    emailToken  DateTime?
     attributes  Json?    
     
 }
@@ -36,12 +34,6 @@ model Post {
     content   String?
     author    User?    @relation(fields: [authorId], references: [id])
     authorId  String?
-}
-
-model EmailVerification {
-    email       String      @id
-    emailToken  String
-    timestamp   DateTime
 }
 
 enum Role {
