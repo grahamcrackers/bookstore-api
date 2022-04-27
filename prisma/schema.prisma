@@ -3,6 +3,7 @@
 
 generator client {
     provider = "prisma-client-js"
+    previewFeatures = ["filterJson"]
 }
 
 datasource db {
@@ -11,17 +12,39 @@ datasource db {
 }
 
 model User {
-    id    String  @id @default(cuid())
-    email String  @unique
-    name  String?
-    posts Post[]
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    email       String   @unique
+    password    String
+    firstname   String?
+    lastname    String?
+    posts       Post[]
+    role        Role     @default(USER)
+    validEmail  Boolean  @default(false)
+    emailToken  DateTime?
+    attributes  Json?    
+    
 }
 
 model Post {
-    id        String    @id @default(cuid())
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    published Boolean? @default(false)
     title     String
     content   String?
-    published Boolean?  @default(false)
-    author    User?     @relation(fields: [authorId], references: id)
+    author    User?    @relation(fields: [authorId], references: [id])
     authorId  String?
+}
+
+model EmailVerification {
+    email       String      @id
+    emailToken  String
+    timestamp   DateTime
+}
+
+enum Role {
+    ADMIN
+    USER
 }

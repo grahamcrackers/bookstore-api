@@ -9,7 +9,7 @@ module.exports = {
         node: true,
         jest: true,
     },
-    plugins: ['@typescript-eslint/eslint-plugin'],
+    // plugins: ['@typescript-eslint/eslint-plugin'],
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
     rules: {
         '@typescript-eslint/interface-name-prefix': 'off',

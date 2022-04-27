@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { User as UserModel } from '@prisma/client';
 import { UserService } from './user.service';
 
@@ -12,8 +12,8 @@ export class UserController {
     // }
 
     @Post('signup')
-    async signup(@Body() userData: { name?: string; email: string }): Promise<UserModel> {
-        return this.userService.create(userData);
+    async signup(@Body() userData: { name?: string; email: string }): Promise<any> {
+        // return this.userService.create(userData);
     }
 
     // @Get()
@@ -21,18 +21,18 @@ export class UserController {
     //     return this.userService.findAll();
     // }
 
-    // @Get(':id')
-    // findOne(@Param('id') id: string) {
-    //     return this.userService.findOne(+id);
-    // }
+    @Get(':email')
+    findOne(@Param('email') email: string) {
+        return this.userService.findOne({ email });
+    }
 
     // @Patch(':id')
     // update(@Param('id') id: string, @Body() updateUserDto: any) {
     //     return this.userService.update(+id, updateUserDto);
     // }
 
-    // @Delete(':id')
-    // remove(@Param('id') id: string) {
-    //     return this.userService.remove(+id);
-    // }
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.userService.remove({ id });
+    }
 }

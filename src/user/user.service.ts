@@ -1,31 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { isValidEmail } from 'src/utils/is-valid-email';
+import * as bcrypt from 'bcrypt';
+import { SALT_ROUNDS } from 'src/common/constants';
+import { UserAttributes } from './interfaces/user-attributes.interface';
 
 @Injectable()
 export class UserService {
-    private readonly users = [
-        {
-            userId: 1,
-            username: 'john',
-            password: 'changeme',
-        },
-        {
-            userId: 2,
-            username: 'maria',
-            password: 'guess',
-        },
-    ];
-
     constructor(private prisma: PrismaService) {}
 
-    create(data: Prisma.UserCreateInput): Promise<User> {
-        return this.prisma.user.create({ data });
+    async create(user: Prisma.UserCreateInput): Promise<User> {
+        if (isValidEmail(user.email) && user.password) {
+            const userRegistered = await this.findOne({ email: user.email });
+            if (!userRegistered) {
+                user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
+                user.attributes = this.getAttributes();
+                return this.prisma.user.create({ data: user });
+            } else if (!userRegistered.validEmail) {
+                return userRegistered;
+            } else {
+                throw new HttpException('USER_ALREADY_REGISTERED', HttpStatus.FORBIDDEN);
+            }
+        }
     }
 
-    async findOne(username: string): Promise<any | undefined> {
-        // return this.prisma.user.findUnique({ where: user });
-        return this.users.find((user) => user.username === username);
+    async findOne(user: Prisma.UserWhereUniqueInput): Promise<User | null> {
+        return this.prisma.user.findUnique({ where: user });
     }
 
     findAll(params: {
@@ -46,5 +47,27 @@ export class UserService {
 
     remove(where: Prisma.UserWhereUniqueInput): Promise<User> {
         return this.prisma.user.delete({ where });
+    }
+
+    async findByToken(token: string) {
+        const users = await this.prisma.user.findMany({
+            where: {
+                attributes: {
+                    path: ['email', 'token'],
+                    equals: token,
+                },
+            },
+        });
+
+        return users.length ? users[0] : undefined;
+    }
+
+    private getAttributes(): Prisma.JsonObject {
+        return {
+            isValid: false,
+            email: {
+                token: '',
+            },
+        };
     }
 }

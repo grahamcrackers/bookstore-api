@@ -21,7 +21,7 @@ export class PostController {
 
     @Get(':id')
     async getPostById(@Param('id') id: string): Promise<PostModel> {
-        return this.postService.findOne({ id: Number(id) });
+        return this.postService.findOne({ id: id });
     }
 
     @Get('feed')
@@ -45,16 +45,16 @@ export class PostController {
         });
     }
 
-    @Put(':id/publishw ')
+    @Put(':id/publish')
     async publishPost(@Param('id') id: string): Promise<PostModel> {
         return this.postService.update({
-            where: { id: Number(id) },
+            where: { id },
             data: { published: true },
         });
     }
 
     @Delete(':id')
     async deletePost(@Param('id') id: string): Promise<PostModel> {
-        return this.postService.remove({ id: Number(id) });
+        return this.postService.remove({ id: id });
     }
 }
